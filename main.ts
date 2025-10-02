@@ -8,8 +8,6 @@ import {
 	Setting,
 } from "obsidian";
 
-// Remember to rename these classes and interfaces!
-
 interface OpenOfficeSettings {
 	mySetting: string;
 }
@@ -26,7 +24,6 @@ export default class OpenOfficePlugin extends Plugin {
 
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {
-				// Support various document types that OnlyOffice can handle
 				const supportedExtensions = [
 					".pdf",
 					".doc",
