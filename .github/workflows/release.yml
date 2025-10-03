@@ -25,7 +25,7 @@ jobs:
 
       - name: Create zip package
         run: |
-          zip plugin.zip main.js manifest.json
+          zip obsidian-open-pdf.zip main.js manifest.json
 
       - name: Create release
         env:
@@ -36,4 +36,4 @@ jobs:
           gh release create "$tag" \
             --title="$tag" \
             --draft \
-            main.js manifest.json plugin.zip
+            main.js manifest.json obsidian-open-pdf.zip
