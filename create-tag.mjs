@@ -1,6 +1,6 @@
 import { readFileSync} from "fs";
 import { $ } from "bun";
-const targetVersion = readFileSync("package.json", "utf8").version;
+const targetVersion = process.env.npm_package_version;
 
 console.log(`Creating tag ${targetVersion}`);
 
