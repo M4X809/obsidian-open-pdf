@@ -9,11 +9,16 @@ import {
 } from "obsidian";
 
 interface OpenOfficeSettings {
-	mySetting: string;
+	macosPath: string;
+	windowsPath: string;
+	linuxPath: string;
 }
 
 const DEFAULT_SETTINGS: OpenOfficeSettings = {
-	mySetting: "default",
+	macosPath: "ONLYOFFICE",
+	windowsPath:
+		"C:\\Program Files\\ONLYOFFICE\\DesktopEditors\\DesktopEditors.exe",
+	linuxPath: "desktopeditors",
 };
 
 export default class OpenOfficePlugin extends Plugin {
@@ -21,6 +26,7 @@ export default class OpenOfficePlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+		this.addSettingTab(new OpenOfficeSettingTab(this.app, this));
 
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {
@@ -122,14 +128,27 @@ export default class OpenOfficePlugin extends Plugin {
 
 		let cmd: string;
 		if (Platform.isMacOS) {
+			if (this.settings.macosPath === "") {
+				new Notice("MacOS open -a parameter is not set");
+				return;
+			}
 			// macOS: use 'open' command with OnlyOffice
-			cmd = `open -a "ONLYOFFICE" "${filePath}"`;
+			cmd = `open -a "${this.settings.macosPath}" "${filePath}"`;
+			// cmd = `/Applications/ONLYOFFICE.app/Contents/MacOS/ONLYOFFICE "${filePath}"`;
 		} else if (Platform.isWin) {
+			if (this.settings.windowsPath === "") {
+				new Notice("Windows path to ONLYOFFICE executable is not set");
+				return;
+			}
 			// Windows: use OnlyOffice Desktop Editors
-			cmd = `"C:\\Program Files\\ONLYOFFICE\\DesktopEditors\\DesktopEditors.exe" "${filePath}"`;
+			cmd = `"${this.settings.windowsPath}" "${filePath}"`;
 		} else {
+			if (this.settings.linuxPath === "") {
+				new Notice("Linux path to ONLYOFFICE binary is not set");
+				return;
+			}
 			// Linux: use desktopeditors command
-			cmd = `desktopeditors "${filePath}"`;
+			cmd = `${this.settings.linuxPath} "${filePath}"`;
 		}
 
 		console.log(`Executing command: ${cmd}`);
@@ -145,7 +164,7 @@ export default class OpenOfficePlugin extends Plugin {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
+class OpenOfficeSettingTab extends PluginSettingTab {
 	plugin: OpenOfficePlugin;
 
 	constructor(app: App, plugin: OpenOfficePlugin) {
@@ -158,17 +177,73 @@ class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		new Setting(containerEl)
-			.setName("Setting #1")
-			.setDesc("It's a secret")
-			.addText((text) =>
-				text
-					.setPlaceholder("Enter your secret")
-					.setValue(this.plugin.settings.mySetting)
-					.onChange(async (value) => {
-						this.plugin.settings.mySetting = value;
-						await this.plugin.saveSettings();
-					})
-			);
+		const platform = Platform.isMacOS
+			? "macOS"
+			: Platform.isWin
+			? "Windows"
+			: "Linux";
+
+		switch (platform) {
+			case "macOS":
+				new Setting(containerEl)
+					.addText((text) =>
+						text
+							.setPlaceholder("MacOS open -a parameter")
+							.setValue(this.plugin.settings.macosPath)
+
+							.onChange(async (value) => {
+								this.plugin.settings.macosPath = value;
+								await this.plugin.saveSettings();
+							})
+					)
+					.setDesc(
+						`Default is "ONLYOFFICE". The command will be executed as "open -a \"${this.plugin.settings.macosPath}\" \${filePath}"`
+					)
+					.setName(`MacOS "open -a" parameter.`);
+				break;
+			case "Windows":
+				new Setting(containerEl)
+					.addText((text) =>
+						text
+							.setPlaceholder("ONLYOFFICE executable path")
+							.setValue(this.plugin.settings.windowsPath)
+							.onChange(async (value) => {
+								this.plugin.settings.windowsPath = value;
+								await this.plugin.saveSettings();
+							})
+					)
+					.setName("Windows path to ONLYOFFICE executable")
+					.setDesc(
+						'Default is "C:\\Program Files\\ONLYOFFICE\\DesktopEditors\\DesktopEditors.exe"'
+					);
+				break;
+			case "Linux":
+				new Setting(containerEl)
+					.addText((text) =>
+						text
+							.setPlaceholder("ONLYOFFICE binary path")
+							.setValue(this.plugin.settings.linuxPath)
+							.onChange(async (value) => {
+								this.plugin.settings.linuxPath = value;
+								await this.plugin.saveSettings();
+							})
+					)
+					.setName("Linux path to ONLYOFFICE binary")
+					.setDesc("This setting has no default value");
+				break;
+		}
+
+		// new Setting(containerEl)
+		// 	.setName("Setting #1")
+		// 	.setDesc("It's a secret")
+		// 	.addText((text) =>
+		// 		text
+		// 			.setPlaceholder("Enter your secret")
+		// 			.setValue(this.plugin.settings.mySetting)
+		// 			.onChange(async (value) => {
+		// 				this.plugin.settings.mySetting = value;
+		// 				await this.plugin.saveSettings();
+		// 			})
+		// 	);
 	}
 }
