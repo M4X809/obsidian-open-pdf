@@ -1,7 +1,7 @@
 {
 	"id": "open-pdf-onlyoffice",
 	"name": "Open in OnlyOffice",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"minAppVersion": "0.15.0",
 	"description": "This plugin allows you to open PDFs and other documents (DOC, DOCX, XLS, XLSX, PPT, PPTX, ODT, ODS, ODP) in OnlyOffice Desktop Editors. Right-click on supported files or use the command palette to open them in OnlyOffice.",
 	"author": "m4x809",
